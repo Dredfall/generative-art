@@ -5,8 +5,16 @@ colors = [
   [221,1,0, 255], 
   [34,80,149, 255]
 ]
+let slider;
+let button;
+let prev_val = -1;
+let token = true;
+let token_stroke = true;
+let r_ok = true;
+let b_ok = true;
+let y_ok = true;
 
-function draw_paint(ord_x, ord_y) {
+function draw_paint(ord_x, ord_y, offset) {
   let a_coord_x = []
   let a_width = []
   let n_row = 3;
@@ -21,9 +29,11 @@ function draw_paint(ord_x, ord_y) {
   let line_length = 300;
   let remain_height = 300;
   let line_height = 300;
-  let offset = 10;
+  //let offset = 10;
   f = [0, 0, 255, 0]
-  f = random(colors)
+  let index = 0
+  let found = false
+  //f = random(colors)
 
   // For all rows
   for (let x = 0; x < n_row; x++) {
@@ -45,7 +55,31 @@ function draw_paint(ord_x, ord_y) {
       a_width[x]=[];
       // Loop over the columns
       for (let y = 0; y < n_col; y++) {
-        f = random(colors)
+        found = false
+        do {
+          index = int(random(0,5))
+          switch (index) {
+            case 0:
+              found = true;
+              break;
+            case 1: 
+              found = true;
+              break;
+            case 2: 
+              if(y_ok)
+                found = true;
+              break;
+            case 3: 
+              if(r_ok)
+                found = true;
+              break;
+            case 4: 
+              if(b_ok)
+                found = true;
+              break;           
+          }                
+        } while(!found)
+        f = colors[index]
         fill(f);
         // Same idea, for the last rect, fill the remaining length
           if (y == n_col - 1) {
@@ -64,10 +98,10 @@ function draw_paint(ord_x, ord_y) {
                     {
                       // If the value of coord_x + width selected more or less (offset) a value of coord_x + width in the previous row
                       if(coord_x + width <= (a_coord_x[x-1][i] + a_width[x-1][i] + offset ) && coord_x + width >= (a_coord_x[x-1][i] + a_width[x-1][i] - offset )) {
-                        console.log(y)
+                        //console.log(y)
                         // then set the current width so that the horizontal lines matches
                         width = a_coord_x[x-1][i+1] - coord_x
-                        console.log(a_coord_x[x-1][i+1])
+                        //console.log(a_coord_x[x-1][i+1])
                       }
                     }
                 }     
@@ -88,18 +122,88 @@ function draw_paint(ord_x, ord_y) {
   }
 }
 
+function generate() {
+  token = true
+}
+
+function r_checked() {
+  if (this.checked()) {
+    r_ok = true;
+  } else {
+    r_ok = false;
+  }
+}
+
+function b_checked() {
+  if (this.checked()) {
+    b_ok = true;
+  } else {
+    b_ok = false;
+  }
+}
+
+function y_checked() {
+  if (this.checked()) {
+    y_ok = true;
+  } else {
+    y_ok = false;
+  }
+}
+
+function l_checked() {
+  if (this.checked()) {
+    token_stroke = true;
+
+  } else {
+    token_stroke = false;
+  }
+}
+
+
 function setup() {
   createCanvas(1500, 1500);
+  slider = createSlider(0, 50, 10, 1);
+  slider.position(1300, 10);
+  slider.style('width', '80px');
+  button = createButton('Generate');
+  button.position(1300, 120);
+  button.mousePressed(generate);
+  r_checkbox = createCheckbox('Red', true);
+  r_checkbox.position(1300,40)
+  r_checkbox.changed(r_checked);
+  b_checkbox = createCheckbox('Blue', true);
+  b_checkbox.position(1300,60)
+  b_checkbox.changed(b_checked);
+  y_checkbox = createCheckbox('Yellow', true);
+  y_checkbox.position(1300,80)
+  y_checkbox.changed(y_checked);
+  l_checkbox = createCheckbox('Lines', true);
+  l_checkbox.position(1300,100)
+  l_checkbox.changed(l_checked);
   strokeWeight(4);
-  noLoop();
+  //noLoop();
 }
 
 function draw() {
-  for(let i = 0 ; i < 4 ; i++)
-  {
-    for(let j = 0 ; j < 2 ; j++)
-    {
-      draw_paint(i*320,j*320);
-    }
+  let val = slider.value();
+  //text('Order', 1300 , 10);
+  console.log(val)
+  if (token_stroke ) {
+    strokeWeight(4);
   }
+  else {
+    strokeWeight(0);
+  }
+  if (token == true)
+  {
+    for(let i = 0 ; i < 4 ; i++)
+    {
+      for(let j = 0 ; j < 2 ; j++)
+      {
+        draw_paint(i*320,j*320, val);
+      }
+    }
+    token = false
+  }
+  prev_val = val
 }
